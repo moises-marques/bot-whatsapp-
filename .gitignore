@@ -1,0 +1,18 @@
+# Pastas do WhatsApp Web.js
+.wwebjs_auth/
+.wwebjs_cache/
+local_auth/
+whatsapp_session/
+
+# Dependências do Node
+node_modules/
+
+# Ambiente virtual Python
+venv/
+
+# Logs
+*.log
+
+# Arquivos temporários
+.DS_Store
+Thumbs.db
