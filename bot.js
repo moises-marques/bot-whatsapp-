@@ -4,7 +4,17 @@ const qrcode = require('qrcode-terminal');
 
 // Cria o cliente com autenticação local (salva sessão)
 const client = new Client({
-    authStrategy: new LocalAuth()
+    authStrategy: new LocalAuth(),
+    puppeteer: {
+        headless: true,
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--single-process',
+            '--disable-gpu'
+        ]
+    }
 });
 
 // Gera QR Code no terminal
