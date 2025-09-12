@@ -16,3 +16,6 @@ venv/
 # Arquivos temporários
 .DS_Store
 Thumbs.db
+
+app.py
+
