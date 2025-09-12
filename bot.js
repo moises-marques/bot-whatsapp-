@@ -8,14 +8,24 @@ const client = new Client({
     puppeteer: {
         headless: true,
         args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--single-process',
-            '--disable-gpu'
+            '--no-sandbox',                // essencial para root
+            '--disable-setuid-sandbox',    // essencial para root
+            '--disable-dev-shm-usage',     // evita falta de memória
+            '--single-process',            // roda em um único processo
+            '--disable-gpu',               // desativa GPU
+            '--disable-extensions',        // desativa extensões do Chrome
+            '--disable-background-networking',
+            '--disable-sync',
+            '--disable-translate',
+            '--hide-scrollbars',
+            '--mute-audio',
+            '--no-first-run',
+            '--no-zygote',
+            '--no-default-browser-check'
         ]
     }
 });
+
 
 // Gera QR Code no terminal
 client.on('qr', qr => {
