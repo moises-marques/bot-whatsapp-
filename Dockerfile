@@ -1,5 +1,5 @@
-# Usa Node 16 como base
-FROM node:16
+# Usa Node 18 (versão LTS mais recente) como base
+FROM node:18-slim
 
 # Define diretório de trabalho
 WORKDIR /app
