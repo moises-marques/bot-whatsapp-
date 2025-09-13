@@ -1,19 +1,30 @@
-// bot.js
+js
 const express = require('express');
 const { Client, LocalAuth } = require('whatsapp-web.js');
-const qrcode = require('qrcode-terminal');
+const qrcode = require('qrcode');
+const app = express();
+
+let qrCodeImage = '';
 
 // --- Pequeno servidor web para keep-alive (UptimeRobot)
-const app = express();
 app.get('/', (req, res) => {
   res.send('OK - bot-whatsapp running');
+});
+
+// rota para mostrar QRCode no navegador
+app.get('/qrcode', (req, res) => {
+  if (qrCodeImage) {
+    res.send(`<h2>Escaneie o QRCode com o WhatsApp</h2><img src="${qrCodeImage}" />`);
+  } else {
+    res.send('<h2>QR Code ainda não gerado, aguarde...</h2>');
+  }
 });
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`HTTP server listening on port ${PORT}`);
 });
 
-// --- Cria o cliente com autenticação local (LocalAuth grava sessão na pasta do Repl)
+// --- Cria o cliente com autenticação local (LocalAuth)
 const client = new Client({
   authStrategy: new LocalAuth(),
   puppeteer: {
@@ -36,11 +47,13 @@ const client = new Client({
   }
 });
 
-// QR code (ASCII) no console
+// converte QR para imagem base64 e guarda
 client.on('qr', qr => {
-  console.log('--- QR Code gerado (escaneie com o WhatsApp) ---');
-  qrcode.generate(qr, { small: true });
-  console.log('--- Fim do QR Code ---');
+  console.log('QR Code gerado, acesse /qrcode para escanear');
+  qrcode.toDataURL(qr, (err, url) => {
+    if (err) return console.error(err);
+    qrCodeImage = url;
+  });
 });
 
 // Log quando pronto
@@ -48,54 +61,6 @@ client.on('ready', () => {
   console.log('Bot está pronto! (client ready)');
 });
 
-// Tratar autenticação falhada
-client.on('auth_failure', msg => {
-  console.error('Falha na autenticação:', msg);
-});
+// Outras events e handlers (auth_failure, disconnected…)
 
-// Tratar desconexões (só log)
-client.on('disconnected', reason => {
-  console.log('Client desconectado:', reason);
-});
-
-// Mensagens automáticas
-const respostas = {
-  'oi': 'Olá! Seja bem-vindo ao nosso atendimento 😊',
-  'suco': 'Temos sucos de: Laranja, Abacaxi e Morango 🥤',
-  'pizza': 'Temos pizzas de: Calabresa, Frango com Catupiry e Margherita 🍕',
-  'refrigerante': 'Temos refrigerantes: Coca-Cola, Guaraná e Fanta 🥤',
-  'hamburguer': 'Temos hambúrgueres de: X-Burger, X-Salada e X-Tudo 🍔',
-  'salgado': 'Temos salgados de: Coxinha, Pastel e Esfiha 🥟',
-  'tchau': 'Obrigado pelo contato! Até logo 👋'
-};
-
-client.on('message', async message => {
-  try {
-    const msg = (message.body || '').toLowerCase();
-    console.log(`Mensagem recebida de ${message.from}: ${msg}`);
-
-    for (let chave in respostas) {
-      if (msg.includes(chave)) {
-        await message.reply(respostas[chave]);
-        console.log(`Bot respondeu: ${respostas[chave]}`);
-        return;
-      }
-    }
-
-    // Mensagem padrão
-    await message.reply('Desculpe, não entendi. Pode escolher uma opção do menu: suco, pizza, refrigerante, hamburguer, salgado.');
-  } catch (err) {
-    console.error('Erro ao processar mensagem:', err);
-  }
-});
-
-// Inicializa o client
 client.initialize();
-
-// Tratamento global de erros (ajuda a não crashar o processo)
-process.on('unhandledRejection', err => {
-  console.error('Unhandled Rejection:', err);
-});
-process.on('uncaughtException', err => {
-  console.error('Uncaught Exception:', err);
-});
